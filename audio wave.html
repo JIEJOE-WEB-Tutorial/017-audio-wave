@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>audio wave</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        font-size: 1vmin;
+    }
+
+    div {
+        display: flex;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100vh;
+        background-color: #171717;
+    }
+
+    .line {
+        position: absolute;
+        justify-content: center;
+        align-items: start;
+        width: 50rem;
+        height: 50rem;
+    }
+
+    .line::after {
+        content: "";
+        position: relative;
+        width: 0.2rem;
+        height: 8rem;
+        background-color: #17f700;
+        transform: scale(var(--s));
+        transition: transform 0.3s ease;
+    }
+</style>
+
+<body>
+</body>
+<script>
+    // JIEJOE produce
+    // b站主页：https://space.bilibili.com/3546390319860710
+    const audio_wave = {
+        waves_data: null,
+        lines_total: 200,
+        lines: [],
+        timer: null,
+        current_wave_index: 0,
+        async init() {
+            for (let i = 0; i < this.lines_total; i++) {
+                const line = document.createElement("div");
+                line.className = "line";
+                line.style.transform = `rotate(${360 / this.lines_total * i}deg)`;
+                line.style.setProperty("--s", 0);
+                document.body.appendChild(line);
+                this.lines.push(line);
+            }
+            this.waves_data = await this.get_waves_data(0.3, this.lines_total);
+            this.run();
+        },
+        async get_waves_data(segment_length, points) {
+            const response = await fetch("audio.mp3");
+            const array_buffer = await response.arrayBuffer();
+            const audio_buffer = await new AudioContext().decodeAudioData(array_buffer);
+            const rate = audio_buffer.sampleRate;
+            const duration = audio_buffer.duration;
+            const channel_data = audio_buffer.getChannelData(0);
+            const result = [];
+            const segments = Math.ceil(duration / segment_length);
+            for (let seg = 0; seg < segments; seg++) {
+                const start_time = seg * segment_length;
+                const end_time = Math.min(start_time + segment_length, duration);
+                if (start_time >= duration) break;
+                const start_sample = Math.floor(start_time * rate);
+                const end_sample = Math.floor(end_time * rate);
+                const point_samples = Math.floor((end_sample - start_sample) / points);
+                const points_data = [];
+                for (let i = 0; i < points; i++) {
+                    const start_seg = start_sample + i * point_samples;
+                    const end_seg = start_seg + point_samples;
+                    let sum = 0;
+                    for (let j = start_seg; j < end_seg; j++) {
+                        sum += Math.abs(channel_data[j] || 0);
+                    }
+                    points_data.push(sum / point_samples);
+                }
+                result.push(points_data);
+            }
+            return result;
+        },
+        run() {
+            this.timer = setInterval(() => {
+                this.current_wave_index = (this.current_wave_index + 1) % (this.waves_data.length - 1);
+                this.lines.forEach((line, i) => {
+                    line.style.setProperty("--s", this.waves_data[this.current_wave_index][i]);
+                })
+            }, 300);
+        }
+    }
+    audio_wave.init();
+</script>
+
+</html>
