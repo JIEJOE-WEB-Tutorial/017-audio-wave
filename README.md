@@ -1,6 +1,6 @@
 # 17 - 音频波纹动画效果
-<a href="https://www.bilibili.com/video/BV1ABC7BYEky">
-<img src="https://i2.hdslb.com/bfs/archive/bb614d19edf44b96302bbe25744bb54db9912b8f.jpg" width="70%">
+<a href="https://www.bilibili.com/video/BV1QNFGzqEMC">
+<img src="https://i0.hdslb.com/bfs/archive/1f2ebf27fda7654932081837b699d8c217abbc5b.jpg" width="70%">
 </a>
 
 **👆👆点击跳转: Bilibili📺教程视频链接**
